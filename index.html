@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Truth or Dare: Friend Game with Chat</title>
+  <style>
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #ffffff;
+      color: #111827;
+      font-size: 18px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Container and layout */
+    #appContainer {
+      width: 100%;
+      max-width: 600px;
+      padding: 48px 24px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      flex-grow: 1;
+      position: relative;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      width: 100%;
+      max-width: 1200px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      z-index: 200;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    header h1 {
+      font-weight: 700;
+      font-size: 48px;
+      color: #111827;
+      margin: 0;
+      user-select: none;
+      line-height: 1;
+    }
+
+    #logoutButton {
+      background: transparent;
+      border: 2px solid #111827;
+      border-radius: 12px;
+      padding: 8px 20px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #111827;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s, color 0.3s, transform 0.3s;
+      border-radius: 0.75rem;
+    }
+    #logoutButton:hover, #logoutButton:focus {
+      background-color: #111827;
+      color: #ffffff;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Login form styles */
+    #loginSection {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    form#loginForm {
+      width: 100%;
+      max-width: 400px;
+      background: #f9fafb;
+      box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+      border-radius: 12px;
+      padding: 48px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      user-select:none;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 1.125rem;
+      color: #111827;
+      margin-bottom: 8px;
+      display: block;
+      cursor: pointer;
+    }
+
+    select, input[type="password"] {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1rem;
+      border: 2px solid #d1d5db;
+      border-radius: 0.75rem;
+      outline-offset: 3px;
+      transition: border-color 0.3s ease;
+      font-family: inherit;
+      color: #111827;
+    }
+    select:focus, input[type="password"]:focus {
+      border-color: #111827;
+      box-shadow: 0 0 0 3px rgba(17,24,39,0.15);
+    }
+
+    .error-message {
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 1rem;
+      min-height: 1.2em;
+      user-select:none;
+    }
+
+    button.action-button {
+      background: #111827;
+      color: white;
+      font-weight: 700;
+      font-size: 1.125rem;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s, transform 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: 100%;
+    }
+    button.action-button:hover, button.action-button:focus {
+      background-color: #374151;
+      outline: none;
+      transform: scale(1.05);
+    }
+    button.action-button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Game section */
+    #gameSection {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      user-select:none;
+      position: relative;
+    }
+
+    .card {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 48px 36px;
+      box-shadow: 0 12px 40px rgba(17,24,39,0.05);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      cursor: default;
+      user-select:none;
+    }
+    .card[data-task-active="false"]:hover {
+      cursor: pointer;
+      box-shadow: 0 16px 50px rgba(17,24,39,0.1);
+      transform: scale(1.02);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card h2 {
+      font-weight: 700;
+      font-size: 40px;
+      margin: 0;
+      color: #111827;
+      line-height: 1.1;
+      min-height: 3.4rem;
+    }
+
+    .card p {
+      color: #6b7280;
+      font-size: 1.125rem;
+      margin: 0;
+      min-height: 2.5rem;
+      user-select:none;
+    }
+
+    .task-type {
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      color: #111827;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+      user-select:none;
+    }
+
+    .task-content {
+      font-size: 1.125rem;
+      color: #111827;
+      white-space: pre-wrap;
+      user-select:none;
+    }
+
+    /* Buttons under card */
+    #tapButton, #taskDoneButton, #playAgainButton {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      background: #111827;
+      color: white;
+      font-weight: 700;
+      font-size: 1.125rem;
+      padding: 18px 0;
+      border: none;
+      cursor: pointer;
+      user-select:none;
+      transition: background-color 0.3s, transform 0.3s;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    #tapButton:hover, #tapButton:focus,
+    #taskDoneButton:hover, #taskDoneButton:focus,
+    #playAgainButton:hover, #playAgainButton:focus {
+      background-color: #374151;
+      outline: none;
+      transform: scale(1.05);
+    }
+    #tapButton[disabled],
+    #taskDoneButton[disabled],
+    #playAgainButton[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* History */
+    #historySection {
+      width: 100%;
+      max-width: 480px;
+      background: #f9fafb;
+      box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+      border-radius: 12px;
+      padding: 24px 32px;
+      font-size: 0.9rem;
+      color: #6b7280;
+      max-height: 300px;
+      overflow-y: auto;
+      user-select:none;
+    }
+
+    #historySection h3 {
+      margin: 0 0 16px 0;
+      font-weight: 700;
+      color: #111827;
+      font-size: 1.25rem;
+      user-select:none;
+    }
+
+    .history-entry {
+      border-left: 4px solid transparent;
+      padding-left: 12px;
+      margin-bottom: 12px;
+      user-select:none;
+      word-break: break-word;
+    }
+    .history-entry:last-child {
+      margin-bottom: 0;
+    }
+    .history-header {
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 4px;
+      user-select:none;
+    }
+    .history-entry[data-friend-id="1"] { border-color: hsl(72, 70%, 50%); }
+    .history-entry[data-friend-id="2"] { border-color: hsl(144, 70%, 50%); }
+    .history-entry[data-friend-id="3"] { border-color: hsl(216, 70%, 50%); }
+    .history-entry[data-friend-id="4"] { border-color: hsl(288, 70%, 50%); }
+    .history-entry[data-friend-id="5"] { border-color: hsl(360, 70%, 50%); }
+
+    /* Chat button on side */
+    #openChatButton {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #111827;
+      border: none;
+      border-radius: 100%;
+      width: 56px;
+      height: 56px;
+      box-shadow: 0 8px 24px rgba(17,24,39,0.15);
+      color: white;
+      font-size: 28px;
+      font-weight: 900;
+      cursor: pointer;
+      user-select:none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, transform 0.3s;
+      z-index: 300;
+    }
+    #openChatButton:hover, #openChatButton:focus {
+      background-color: #374151;
+      outline: none;
+      transform: scale(1.1);
+    }
+
+    /* Chat popup */
+    #chatPopupOverlay {
+      display: none;
+      position: fixed;
+      z-index: 400;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      justify-content: center;
+      align-items: center;
+    }
+    #chatPopupOverlay.active {
+      display: flex;
+    }
+
+    #chatPopup {
+      background: #f9fafb;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 40px rgba(17,24,39,0.1);
+      user-select:none;
+    }
+
+    #chatHeader {
+      background: #111827;
+      color: white;
+      font-size: 1.5rem;
+      padding: 18px 24px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select:none;
+    }
+
+    #chatCloseButton {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      user-select:none;
+      line-height: 1;
+      font-weight: 900;
+      padding: 0;
+      margin: 0;
+      transition: transform 0.2s ease;
+    }
+    #chatCloseButton:hover, #chatCloseButton:focus {
+      outline: none;
+      transform: scale(1.1);
+    }
+
+    #chatMessages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px 24px;
+      background: #ffffff;
+      color: #111827;
+      user-select:none;
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-message {
+      background: #f3f4f6;
+      border-radius: 10px;
+      padding: 12px 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+      line-height: 1.3;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .chat-message.self {
+      background: #111827;
+      color: white;
+      margin-left: auto;
+    }
+    .chat-message .sender-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      user-select:none;
+    }
+    .chat-message .message-text {
+      white-space: pre-wrap;
+      user-select:none;
+    }
+    .chat-message .timestamp {
+      font-size: 0.7rem;
+      color: #6b7280;
+      margin-top: 4px;
+      text-align: right;
+      user-select:none;
+    }
+
+    #chatInputArea {
+      display: flex;
+      gap: 12px;
+      padding: 12px 24px;
+      background: #f9fafb;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+
+    #chatInput {
+      flex-grow: 1;
+      font-size: 1rem;
+      padding: 12px 18px;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      font-family: inherit;
+      outline-offset: 3px;
+      transition: border-color 0.3s;
+      resize: none;
+      min-height: 40px;
+      max-height: 100px;
+    }
+    #chatInput:focus {
+      border-color: #111827;
+      box-shadow: 0 0 0 3px rgba(17,24,39,0.15);
+      outline: none;
+    }
+    #chatSendButton {
+      background: #111827;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 1.125rem;
+      padding: 0 24px;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      user-select:none;
+      transition: background-color 0.3s, transform 0.3s;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    #chatSendButton[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #chatSendButton:hover:not([disabled]), #chatSendButton:focus:not([disabled]) {
+      background-color: #374151;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 32px;
+      }
+      #appContainer {
+        padding: 32px 16px 48px;
+      }
+      form#loginForm {
+        max-width: 100%;
+        padding: 32px 24px;
+        gap: 16px;
+      }
+      .card {
+        padding: 32px 24px;
+        max-width: 100%;
+      }
+      #historySection {
+        max-height: 220px;
+        padding: 16px 20px;
+      }
+      #tapButton, #taskDoneButton, #playAgainButton {
+        max-width: 100%;
+        padding: 16px 0;
+        font-size: 1rem;
+      }
+      #logoutButton {
+        padding: 6px 16px;
+        font-size: 0.9rem;
+      }
+      #chatPopup {
+        width: 95vw;
+        max-width: 380px;
+        max-height: 85vh;
+      }
+      #chatInputArea {
+        padding: 8px 16px;
+      }
+      #chatInput {
+        min-height: 36px;
+        font-size: 0.95rem;
+      }
+      #chatSendButton {
+        padding: 0 18px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header role="banner">
+    <h1>Truth or Dare</h1>
+    <button id="logoutButton" aria-label="Logout" style="display:none;">Logout</button>
+  </header>
+
+  <div id="appContainer" aria-live="polite" aria-atomic="true">
+
+    <!-- <div id="resetControls" style="display: flex; justify-content: center; gap: 1rem; margin-top: 16px; flex-wrap: wrap;">
+        <button id="resetTaskHistoryBtn" class="action-button" style="background-color: #ef4444;">Reset Task History</button>
+        <button id="resetChatHistoryBtn" class="action-button" style="background-color: #ef4444;">Reset Chat History</button>
+    </div> -->
+
+
+    <!-- Login Section -->
+    <section id="loginSection" aria-label="Login form">
+      <form id="loginForm" autocomplete="off" novalidate>
+        <label for="friendIdInput">Select Your Friend ID:</label>
+        <select id="friendIdInput" required aria-required="true" aria-describedby="passwordHelp">
+          <option value="" disabled selected>Select friend ID</option>
+          <option value="1">Friend 1</option>
+          <option value="2">Friend 2</option>
+          <option value="3">Friend 3</option>
+          <option value="4">Friend 4</option>
+          <option value="5">Friend 5</option>
+        </select>
+
+        <label for="passwordInput">Enter Your Password:</label>
+        <input type="password" id="passwordInput" required aria-required="true" aria-describedby="passwordHelp" autocomplete="new-password" />
+
+        <div id="passwordHelp" class="error-message" role="alert" aria-live="assertive"></div>
+
+        <button type="submit" class="action-button" id="loginButton">Login</button>
+      </form>
+    </section>
+
+    <!-- Game Section -->
+    <section id="gameSection" aria-label="Truth or Dare Game" style="display:none; flex-direction: column; align-items:center; gap:32px; user-select:none;">
+      <div class="card" id="gameCard" aria-label="Game card" data-task-active="false">
+        <h2 id="cardHeadline">Tap to select a friend and a task</h2>
+        <p id="cardSubtext">Waiting for your action...</p>
+      </div>
+
+      <button id="tapButton" class="action-button" aria-label="Tap to play truth or dare" style="margin-top: -32px;">Tap to Play</button>
+      <button id="taskDoneButton" class="action-button" aria-label="Mark task done" style="display:none;">Task Done</button>
+      <button id="playAgainButton" class="action-button" aria-label="Play again" style="display:none;">Play Again</button>
+
+      <section id="historySection" aria-label="Task history" tabindex="0" style="width: 100%;">
+        <h3>Tasks History</h3>
+        <div id="historyList" aria-live="polite" aria-relevant="additions"></div>
+      </section>
+    </section>
+  </div>
+
+  <!-- Chat Button -->
+  <button id="openChatButton" aria-label="Open chat messages" title="Chat Messages">💬</button>
+
+  <!-- Chat Popup Overlay -->
+  <div id="chatPopupOverlay" role="dialog" aria-modal="true" aria-label="Chat messages">
+    <div id="chatPopup">
+      <div id="chatHeader">
+        Chat Messages
+        <button id="chatCloseButton" aria-label="Close chat messages">&times;</button>
+      </div>
+      <div id="chatMessages" tabindex="0" aria-live="polite" aria-relevant="additions"></div>
+      <div id="chatInputArea">
+        <textarea id="chatInput" rows="2" aria-label="Type your message"></textarea>
+        <button id="chatSendButton" aria-label="Send chat message" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+
+    <script>
+        // Firebase config 
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7DV7dn66P7ihhwjV375fM2CC5UKDml7A",
+            authDomain: "truth-6e833.firebaseapp.com",
+            databaseURL: "https://truth-6e833-default-rtdb.firebaseio.com",
+            projectId: "truth-6e833",
+            storageBucket: "truth-6e833.firebasestorage.app",
+            messagingSenderId: "801201675937",
+            appId: "1:801201675937:web:dc87597450cab47c715ae0",
+            measurementId: "G-9K99B7SZ5P"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        (() => {
+            // Password map 
+            const friendPasswords = {
+            1: "friendpass01",
+            2: "friend2pass",
+            3: "friend3pass",
+            4: "friend4pass",
+            5: "friend5pass"
+            };
+
+            const friendsCount = 5;
+
+            const truthTasks = [
+            "What’s your most embarrassing moment?",
+            "Have you ever cheated on a bf/gf?",
+            "What’s a secret you’ve never told anyone?",
+            "Who was your first crush?",
+            "What’s your biggest fear?"
+            ];
+
+            const dareTasks = [
+            "Send a funny selfie to the group chat.",
+            "Record a 10-second dance video and share it.",
+            "Draw a quick portrait of yourself and share a photo.",
+            "Send a silly voice message doing your best animal sound.",
+            "Post a childhood photo and share a fun memory."
+            ];
+
+            // Elements
+            const loginSection = document.getElementById("loginSection");
+            const gameSection = document.getElementById("gameSection");
+            const loginForm = document.getElementById("loginForm");
+            const friendIdInput = document.getElementById("friendIdInput");
+            const passwordInput = document.getElementById("passwordInput");
+            const passwordHelp = document.getElementById("passwordHelp");
+
+            const card = document.getElementById("gameCard");
+            const cardHeadline = document.getElementById("cardHeadline");
+            const cardSubtext = document.getElementById("cardSubtext");
+            const tapBtn = document.getElementById("tapButton");
+            const taskDoneBtn = document.getElementById("taskDoneButton");
+            const playAgainBtn = document.getElementById("playAgainButton");
+            const historyList = document.getElementById("historyList");
+            const logoutBtn = document.getElementById("logoutButton");
+
+            // Chat elements
+            const openChatButton = document.getElementById("openChatButton");
+            const chatPopupOverlay = document.getElementById("chatPopupOverlay");
+            const chatCloseButton = document.getElementById("chatCloseButton");
+            const chatMessages = document.getElementById("chatMessages");
+            const chatInput = document.getElementById("chatInput");
+            const chatSendButton = document.getElementById("chatSendButton");
+
+            let loggedInFriendId = null;
+            let loggedInFriendName = null;
+
+            // Helpers
+            function getRandomInt(max) {
+            return Math.floor(Math.random() * max);
+            }
+
+            function selectRandomFriend() {
+            const ids = [];
+            for (let i = 1; i <= friendsCount; i++) {
+                ids.push(i);
+            }
+            return ids[getRandomInt(ids.length)];
+            }
+
+            function selectTask(type) {
+            if (type === "Truth") {
+                return truthTasks[getRandomInt(truthTasks.length)];
+            } else {
+                return dareTasks[getRandomInt(dareTasks.length)];
+            }
+            }
+
+            function renderHistoryEntry(entry) {
+            const container = document.createElement("div");
+            container.classList.add("history-entry");
+            container.dataset.friendId = entry.friendId;
+            const friendColor = `hsl(${(entry.friendId * 72) % 360}, 70%, 50%)`;
+            container.style.borderLeft = `4px solid ${friendColor}`;
+            const header = document.createElement("div");
+            header.className = "history-header";
+            header.textContent = `Friend ${entry.friendId} - ${entry.type} (${new Date(entry.timestamp).toLocaleTimeString()})`;
+            const content = document.createElement("div");
+            content.className = "history-content";
+            content.textContent = entry.task;
+            container.appendChild(header);
+            container.appendChild(content);
+            return container;
+            }
+
+            function updateHistoryUI(history) {
+            historyList.innerHTML = "";
+            history.forEach(entry => {
+                historyList.appendChild(renderHistoryEntry(entry));
+            });
+            }
+
+            function allFriendsDone(doneStatus) {
+            if (!doneStatus) return false;
+            for (let i = 1; i <= friendsCount; i++) {
+                if (!doneStatus[i]) return false;
+            }
+            return true;
+            }
+
+            // Updates main UI based on game state and logged in friend
+            function updateUIFromState(state) {
+            const userFriendId = loggedInFriendId;
+            if (!userFriendId) return;
+
+            if (!state || !state.currentTask) {
+                card.dataset.taskActive = "false";
+                cardHeadline.textContent = "Tap to select a friend and a task";
+                cardSubtext.textContent = "Waiting for your action...";
+                tapBtn.style.display = "inline-block";
+                tapBtn.disabled = false;
+                taskDoneBtn.style.display = "none";
+                playAgainBtn.style.display = "none";
+                return;
+            }
+
+            const { currentTask, doneStatus } = state;
+            card.dataset.taskActive = "true";
+            cardHeadline.textContent = `Friend ${currentTask.friendId} selected!`;
+            cardSubtext.innerHTML = `<div class="task-type">${currentTask.type}</div><div class="task-content">${currentTask.task}</div>`;
+
+            const userDone = doneStatus && doneStatus[userFriendId];
+            if (userDone) {
+                taskDoneBtn.style.display = "none";
+                tapBtn.style.display = "none";
+            } else {
+                taskDoneBtn.style.display = "inline-block";
+                taskDoneBtn.disabled = false;
+                tapBtn.style.display = "none";
+            }
+
+            if (allFriendsDone(doneStatus)) {
+                playAgainBtn.style.display = "inline-block";
+                taskDoneBtn.style.display = "none";
+                tapBtn.style.display = "none";
+            } else {
+                playAgainBtn.style.display = "none";
+            }
+            }
+
+            // Chat message render helper
+            function createChatMessageElement(msgData) {
+            const container = document.createElement("div");
+            container.classList.add("chat-message");
+            if (msgData.friendId === loggedInFriendId) {
+                container.classList.add("self");
+            }
+            const sender = document.createElement("div");
+            sender.className = 'sender-name';
+            sender.textContent = `Friend ${msgData.friendId}`;
+            const text = document.createElement("div");
+            text.className = 'message-text';
+            text.textContent = msgData.message;
+            const time = document.createElement("div");
+            time.className = 'timestamp';
+            time.textContent = new Date(msgData.timestamp).toLocaleTimeString();
+            container.appendChild(sender);
+            container.appendChild(text);
+            container.appendChild(time);
+            return container;
+            }
+
+            // Update chat messages UI with all messages
+            function updateChatMessagesUI(messages) {
+            chatMessages.innerHTML = "";
+            messages.forEach(msg => {
+                chatMessages.appendChild(createChatMessageElement(msg));
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Login handler
+            loginForm.addEventListener("submit", e => {
+            e.preventDefault();
+            const selectedId = parseInt(friendIdInput.value, 10);
+            const enteredPass = passwordInput.value.trim();
+
+            if (!selectedId) {
+                passwordHelp.textContent = "Please select a Friend ID.";
+                return;
+            }
+            if (!enteredPass) {
+                passwordHelp.textContent = "Please enter your password.";
+                return;
+            }
+
+            const correctPass = friendPasswords[selectedId];
+            if (enteredPass === correctPass) {
+                loggedInFriendId = selectedId;
+                passwordHelp.textContent = "";
+                friendIdInput.disabled = true;
+                passwordInput.value = "";
+                loginSection.style.display = "none";
+                gameSection.style.display = "flex";
+                logoutBtn.style.display = "inline-block";
+
+                // Sync initial UI state for game and chat
+                db.ref("truth-or-dare-game").once("value").then(snapshot => {
+                updateUIFromState(snapshot.val());
+                updateHistoryUI(snapshot.val()?.history || []);
+                });
+                db.ref("chat-messages").once("value").then(snapshot => {
+                updateChatMessagesUI(snapshot.val() || []);
+                });
+            } else {
+                passwordHelp.textContent = "Incorrect password. Please try again.";
+            }
+            });
+
+            // Logout handler
+            logoutBtn.addEventListener("click", () => {
+            loggedInFriendId = null;
+            passwordHelp.textContent = "";
+            friendIdInput.disabled = false;
+            loginSection.style.display = "block";
+            gameSection.style.display = "none";
+            logoutBtn.style.display = "none";
+            closeChatPopup();
+            chatMessages.innerHTML = "";
+            });
+
+            // Firebase DB refs
+            const dbRef = db.ref("truth-or-dare-game");
+            const chatRef = db.ref("chat-messages");
+
+            // Listen to DB changes (game state)
+            dbRef.on("value", snapshot => {
+            const state = snapshot.val() || {};
+            updateUIFromState(state);
+            updateHistoryUI(state.history || []);
+            });
+
+            // Listen to chat messages updates
+            chatRef.on("value", snapshot => {
+            const messages = snapshot.val() || [];
+            updateChatMessagesUI(messages);
+            });
+
+            // Tap Play button handler - start a new task if none active
+            tapBtn.addEventListener("click", () => {
+            if (!loggedInFriendId) return;
+            dbRef.transaction(currentData => {
+                if (currentData && currentData.currentTask) {
+                return;
+                }
+                const selectedFriend = selectRandomFriend();
+                const taskType = Math.random() < 0.5 ? "Truth" : "Dare";
+                const taskText = selectTask(taskType);
+
+                const newTask = {
+                friendId: selectedFriend,
+                type: taskType,
+                task: taskText,
+                timestamp: Date.now()
+                };
+
+                if (!currentData) currentData = {history: []};
+                currentData.currentTask = newTask;
+                currentData.doneStatus = {};
+                currentData.history = currentData.history || [];
+                currentData.history.unshift(newTask);
+                if (currentData.history.length > 20) currentData.history.pop();
+
+                return currentData;
+            });
+            });
+
+            // Task Done button handler - mark current friend done
+            taskDoneBtn.addEventListener("click", () => {
+            if (!loggedInFriendId) return;
+            dbRef.transaction(currentData => {
+                if (!currentData || !currentData.currentTask) return;
+                currentData.doneStatus = currentData.doneStatus || {};
+                if (currentData.doneStatus[loggedInFriendId]) return;
+                currentData.doneStatus[loggedInFriendId] = true;
+                return currentData;
+            });
+            });
+
+            // Play Again button handler - clear current task & doneStatus
+            playAgainBtn.addEventListener("click", () => {
+            if (!loggedInFriendId) return;
+            dbRef.transaction(currentData => {
+                if (!currentData) return;
+                currentData.currentTask = null;
+                currentData.doneStatus = {};
+                return currentData;
+            });
+            });
+
+            // Chat popup logic
+            function openChatPopup() {
+            chatPopupOverlay.classList.add("active");
+            chatInput.focus();
+            }
+            function closeChatPopup() {
+            chatPopupOverlay.classList.remove("active");
+            chatInput.value = "";
+            chatSendButton.disabled = true;
+            }
+
+            openChatButton.addEventListener("click", () => {
+            if (gameSection.style.display === "flex") {
+                openChatPopup();
+            }
+            });
+            chatCloseButton.addEventListener("click", closeChatPopup);
+            chatPopupOverlay.addEventListener("click", (evt) => {
+            if (evt.target === chatPopupOverlay) closeChatPopup();
+            });
+
+            // Enable send button only when input has text
+            chatInput.addEventListener("input", () => {
+            chatSendButton.disabled = !chatInput.value.trim();
+            });
+
+            // Send chat message
+            chatSendButton.addEventListener("click", () => {
+            if (!loggedInFriendId) return;
+            const messageText = chatInput.value.trim();
+            if (!messageText) return;
+            const newMessage = {
+                friendId: loggedInFriendId,
+                message: messageText,
+                timestamp: Date.now()
+            };
+            chatSendButton.disabled = true;
+
+            // Push new message to Firebase
+            chatRef.transaction(currentMessages => {
+                if (!Array.isArray(currentMessages)) currentMessages = [];
+                currentMessages.push(newMessage);
+                // Keep chat history to last 100 to limit size
+                if (currentMessages.length > 100) currentMessages = currentMessages.slice(currentMessages.length - 100);
+                return currentMessages;
+            }).then(() => {
+                chatInput.value = "";
+                chatInput.focus();
+            }).catch(() => {
+                // On error, re-enable send button
+                chatSendButton.disabled = false;
+            });
+            });
+
+            // Accessibility: allow send on enter key (ctrl+enter for new line)
+            chatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (!chatSendButton.disabled) {
+                chatSendButton.click();
+                }
+            }
+            });
+        })();
+
+    </script>
+
+    <script>
+        const resetTaskHistoryBtn = document.getElementById("resetTaskHistoryBtn");
+        const resetChatHistoryBtn = document.getElementById("resetChatHistoryBtn");
+
+        resetTaskHistoryBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to reset the task history? This cannot be undone.")) {
+            dbRef.transaction(currentData => {
+            if (!currentData) return;
+            currentData.history = [];
+            // Optionally reset currentTask and doneStatus if desired:
+            // currentData.currentTask = null;
+            // currentData.doneStatus = {};
+            return currentData;
+            });
+        }
+        });
+
+        resetChatHistoryBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to reset all chat history? This cannot be undone.")) {
+            const chatRef = db.ref("chat-messages");
+            chatRef.set([]);
+        }
+        });
+
+    </script>
+
+  <p style="text-align:center; max-width:600px; margin:48px auto 24px; color:#555;font-size:0.9rem;">
+    <strong>Note:</strong> Don't take it serious just enjoy the moments
+  </p>
+</body>
+</html>
+
